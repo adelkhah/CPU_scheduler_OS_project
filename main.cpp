@@ -16,41 +16,13 @@ ___yek shokre to az hezar natvanam kard
 */
 
 #include <bits/stdc++.h>
-
-
 #define pb push_back
-#define SALI main
-#define left(x) ((x)*2)
-#define right(x) (((x)*2)+1)
-#define fuck(x) cout << #x << " : " << x << endl
-#define findLowVec(v,x) (lower_bound(v.begin(), v.end(), x) - v.begin())
-#define findUpVec(v,x) (upper_bound(v.begin(), v.end(), x) - v.begin())
-#define findLowArr(a,n,x) (lower_bound(a, a+n, x) - a)
-#define findUpArr(a,n,x) (upper_bound(a, a+n, x) - a)
+#define SALIMOON main
 #define int long long
 
 using namespace std;
 
-
-typedef long long ll;
-typedef pair<int,int> pii;
-typedef pair<int,char> pic;
-typedef long double ld;
-
-template<class A, class B> ostream& operator <<(ostream& out, const pair<A, B> &p)
-{return out << "(" << p.first << ", " << p.second << ")";}
-
-template<class A> ostream& operator <<(ostream& out, const vector<A> &v)
-{out << "[";for(int i = 0; i < v.size(); i++) {if(i) out << ", ";out << v[i];}return out << "]";}
-
-template<class A,class B> ostream& operator <<(ostream& out, const set<A,B> &s)
-{out << "[";for(auto i = s.begin(); i != s.end(); i++) {out << ", ";out << *i;}return out << "]";}
-
-template<class A> ostream& operator <<(ostream& out, const set<A> &s)
-{out << "[";for(auto i = s.begin(); i != s.end(); i++) {out << ", ";out << *i;}return out << "]";}
-
-struct process
-{
+struct process {
     string name;
     char type;
     int burst_time;
@@ -59,8 +31,8 @@ struct process
     string state;
     int CPU_used;
     bool complete;
-    void input()
-    {
+
+    void input() {
         cin >> name >> burst_time;
         CPU_used = 0;
         state = "ready";
@@ -70,94 +42,78 @@ struct process
     }
 
 };
-/*
-template<class A> ostream& operator <<(ostream& out, const process &a)
-{out << "(name = " << a.name << ", type = " << a.type << ", time" << ", rmd = "
-<< a.rmd << ", state = " << a.state << ", CPU_used = " << a.CPU_used << ")";}
-*/
+
 int n;
 int total_time;
 vector<process> ready;
 process running;
 
 
-// X : A B
-// Y : B C
-// Z : A C
-bool run(int i, int Qt)
-{
-    if(Qt == -1){ // non preemptive
+bool run(int i, int Qt) {
+    if (Qt == -1) { // non preemptive
         running = ready[i];
         ready[i].state = "running";
-        while(ready[i].rmd > 0){
+        while (ready[i].rmd > 0) {
             ready[i].rmd--;
             ready[i].CPU_used++;
         }
         ready[i].state = "terminated";
         ready[i].complete = true;
         return true;
-    }
-    else{
+    } else {
         running = ready[i];
         ready[i].state = "running";
-        while(ready[i].rmd > 0 && Qt > 0){
+        while (ready[i].rmd > 0 && Qt > 0) {
             ready[i].rmd--;
             Qt--;
             ready[i].CPU_used++;
         }
-        if(ready[i].rmd == 0){
+        if (ready[i].rmd == 0) {
             ready[i].state = "terminated";
             ready[i].complete = true;
             return true;
-        }
-        else{
+        } else {
             ready[i].state = "ready";
             return false;
         }
     }
 }
 
-void show_queue()
-{
+void show_queue() {
     cout << "running : " << running.name << endl;
     cout << "ready : ";
-    for(int i = 0; i < ready.size(); i++){
+    for (int i = 0; i < ready.size(); i++) {
         cout << ready[i].name << " ";
     }
     cout << endl;
 }
 
-void First_Come_First_Served()
-{
-    while(!ready.empty()){
+void First_Come_First_Served() {
+    while (!ready.empty()) {
         run(0, -1);
         ready.erase(ready.begin());
         show_queue();
     }
 }
 
-bool cmp(const process &p1, const process &p2)
-{
+bool cmp(const process &p1, const process &p2) {
     return p1.rmd < p2.rmd;
 }
 
-void Shortest_Job_First()
-{
+void Shortest_Job_First() {
     sort(ready.begin(), ready.end(), cmp);
-    while(!ready.empty()){
+    while (!ready.empty()) {
         run(0, -1);
         ready.erase(ready.begin());
         show_queue();
     }
 }
 
-void Round_Robin(int quantum)
-{
-    while(!ready.empty()){
-        if(run(0, quantum)){ // process terminated
+void Round_Robin(int quantum) {
+    while (!ready.empty()) {
+        if (run(0, quantum)) { // process terminated
             ready.erase(ready.begin());
-        }
-        else{ // process
+        } else { // process
             process pr = ready[0];
             ready.erase(ready.begin());
             ready.pb(pr);
@@ -167,10 +123,9 @@ void Round_Robin(int quantum)
 }
 
 // extra credit
-void HRRN()
-{
+void HRRN() {
     int t = 0;
-    while(!ready.empty()){
+    while (!ready.empty()) {
         float hrr = -9999;
 
         // Response Ratio Variable
@@ -178,13 +133,13 @@ void HRRN()
 
         // Variable to store next process selected
         int loc;
-        for (int i = 0; i < ready.size(); i++){
+        for (int i = 0; i < ready.size(); i++) {
 
             // Checking if process has arrived and is Incomplete
             if (ready[i].arrival_time <= t && !ready[i].complete) {
 
                 // Calculating Response Ratio
-                temp = ((float)ready[i].burst_time + (t - ready[i].arrival_time)) / ready[i].burst_time;
+                temp = ((float) ready[i].burst_time + (t - ready[i].arrival_time)) / ready[i].burst_time;
                 // Checking for Highest Response Ratio
                 if (hrr < temp) {
 
@@ -202,10 +157,10 @@ void HRRN()
         show_queue();
     }
 }
-void input()
-{
+
+void input() {
     cin >> n;
-    for(int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++) {
         process t;
         t.input();
         ready.pb(t);
@@ -213,8 +168,8 @@ void input()
     }
 
 }
-int32_t SALI()
-{
+
+int32_t SALIMOON() {
     input();
     //First_Come_First_Served();
     //Shortest_Job_First();
@@ -223,4 +178,3 @@ int32_t SALI()
 }
 
 // 5 A 5 B 4 C 3 D 2 E 1
-/**< WRITEN BY ALI ADELKHAH */
